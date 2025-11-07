@@ -11,6 +11,13 @@ Features
 ⚙️ Configurable via check.yaml in each repository
 🔐 Secure webhook signature verification
 
+
+## Setup private key
+
+Use base64 from the private key, eg:
+base64 -w0 id_rsa.pem > id_rsa.b64    # -w0 to avoid wrapping
+
+
 ## Setup
 
 ```bash

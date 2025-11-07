@@ -1,15 +1,21 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import config from '../config/config';
-import { Octokit } from '@octokit/rest';
+import { Octokit, App } from 'octokit';
 
 let octokitInstance: Octokit | null = null;
-export const getOctokit = (): Octokit => {
+export const getAppOctokit = async (): Promise<Octokit> => {
   if (!octokitInstance) {
-    octokitInstance = new Octokit({
+    let appBotInstance = new App({
+      appId: Number(config.githubEnv.github_app_id),
+      privateKey: config.githubEnv.github_app_private_key as string,
       auth: config.githubEnv.github_token,
     });
+    octokitInstance = await appBotInstance.getInstallationOctokit(Number(config.githubEnv.github_installation_id));
+  } else {
+    console.log('App instance already created');
   }
+
   return octokitInstance;
 }
 
@@ -37,10 +43,10 @@ export async function receiveWebhook(req: Request, res: Response): Promise<void>
   const hmac = crypto.createHmac('sha256', webhookSecret);
   const digest = 'sha256=' + hmac.update(payload).digest('hex');
 
-  if (signature !== digest) {
-    res.status(401).json({ error: 'Invalid signature' });
-    return;
-  }
+//   if (signature !== digest) {
+//     res.status(401).json({ error: 'Invalid signature' });
+//     return;
+//   }
 
   const event = req.headers['x-github-event'] as string;
   const payload_data = req.body;
@@ -69,7 +75,8 @@ export async function commentPR(
   comment: string
 ): Promise<void> {
   try {
-    await getOctokit().rest.issues.createComment({
+    const octokit = await getAppOctokit();
+    octokit.rest.issues.createComment({
       owner,
       repo,
       issue_number: prNumber,

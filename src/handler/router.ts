@@ -12,6 +12,7 @@ router.get('/health', (req, res) => {
 });
 
 router.get('/github/webhook', receiveWebhook);
+router.post('/github/webhook', receiveWebhook);
 
 export default router;
 
