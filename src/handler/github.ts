@@ -49,6 +49,7 @@ export async function receiveWebhook(req: Request, res: Response): Promise<void>
   if (event === 'pull_request') {
     // Process pull request event
     console.log(`Received PR event: ${payload_data.action} for PR #${payload_data.pull_request?.number}`);
+    commentPR(payload_data.pull_request?.user?.login, payload_data.pull_request?.head?.repo?.name, payload_data.pull_request?.number, 'Hello, world!');
   }
 
   res.status(200).json({ received: true, event });
